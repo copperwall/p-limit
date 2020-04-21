@@ -121,16 +121,17 @@ test('activeCount and pendingCount properties', async t => {
 	t.is(limit.pendingCount, 0);
 });
 
-test('clearQueue', t => {
+test('clearQueue', async t => {
 	const limit = pLimit(1);
 
 	Array.from({length: 1}, () => limit(() => delay(1000)));
-	Array.from({length: 3}, () => limit(() => delay(1000)).catch(
-		error => t.is(error.message, 'queue cleared before function was invoked')
-	));
+	const pendingPromises = Array.from({length: 3},
+		() => t.throwsAsync(limit(() => delay(1000)), 'queue cleared before function was invoked')
+	);
 
 	t.is(limit.pendingCount, 3);
 	limit.clearQueue();
+	await Promise.all(pendingPromises);
 	t.is(limit.pendingCount, 0);
 });
 
