@@ -125,7 +125,9 @@ test('clearQueue', t => {
 	const limit = pLimit(1);
 
 	Array.from({length: 1}, () => limit(() => delay(1000)));
-	Array.from({length: 3}, () => limit(() => delay(1000)));
+	Array.from({length: 3}, () => limit(() => delay(1000)).catch(
+		error => t.is(error.message, 'queue cleared before function was invoked')
+	));
 
 	t.is(limit.pendingCount, 3);
 	limit.clearQueue();
