@@ -98,6 +98,10 @@ test('activeCount and pendingCount properties', async t => {
 	t.is(limit.pendingCount, 0);
 
 	const runningPromise1 = limit(() => delay(1000));
+	t.is(limit.activeCount, 0);
+	t.is(limit.pendingCount, 1);
+
+	await Promise.resolve();
 	t.is(limit.activeCount, 1);
 	t.is(limit.pendingCount, 0);
 
@@ -108,6 +112,7 @@ test('activeCount and pendingCount properties', async t => {
 	const immediatePromises = Array.from({length: 5}, () => limit(() => delay(1000)));
 	const delayedPromises = Array.from({length: 3}, () => limit(() => delay(1000)));
 
+	await Promise.resolve();
 	t.is(limit.activeCount, 5);
 	t.is(limit.pendingCount, 3);
 
@@ -129,6 +134,7 @@ test('clearQueue', async t => {
 		() => t.throwsAsync(limit(() => delay(1000)), 'queue cleared before function was invoked')
 	);
 
+	await Promise.resolve();
 	t.is(limit.pendingCount, 3);
 	limit.clearQueue();
 	await Promise.all(pendingPromises);
